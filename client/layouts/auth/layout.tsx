@@ -8,7 +8,7 @@ import Alert from '@mui/material/Alert';
 
 //import { RouterLink } from 'src/routes/components';
 
-//import { Logo } from 'src/components/logo';
+import { Logo } from '../../components/logo';
 
 import { AuthContent } from './content';
 import { MainSection } from '../core/main-section';
@@ -52,15 +52,12 @@ export function AuthLayout({
       leftArea: (
         <>
           {/** @slot Logo */}
-          <img />
+          <Logo />
         </>
       ),
       rightArea: (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 } }}>
           {/** @slot Help link */}
-          <Link href="#" color="inherit" sx={{ typography: 'subtitle2' }}>
-            Need help?
-          </Link>
         </Box>
       ),
     };
@@ -137,12 +134,15 @@ export function AuthLayout({
 const backgroundStyles = (): CSSObject => ({
   zIndex: 1,
   opacity: 0.24,
-  width: '100%',
-  height: '100%',
+  width: '100vw',
+  height: '100vh',
   content: "''",
-  position: 'absolute',
+  position: 'fixed',
+  top: 0,
+  left: 0,
   backgroundSize: 'cover',
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center center',
   backgroundImage: 'url(/assets/background/overlay.jpg)',
+  backgroundAttachment: 'fixed',
 });

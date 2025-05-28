@@ -1,10 +1,12 @@
-import { OverviewAnalyticsView as DashboardView } from '../sections/overview/view';
 import { DashboardLayout } from '../layouts/dashboard';
+import { NotFoundView } from '../sections/error';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 
-export default function Dashboard() {
+// ----------------------------------------------------------------------
+
+export default function Page() {
   const router = useRouter();
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -17,10 +19,10 @@ export default function Dashboard() {
   return (
     <>
       <Head>
-        <title>Dashboard | Data Management System</title>
+        <title>404 Page Not Found | Data Management System</title>
       </Head>
       <DashboardLayout>
-        <DashboardView />
+        <NotFoundView />
       </DashboardLayout>
     </>
   );

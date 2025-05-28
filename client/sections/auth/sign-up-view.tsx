@@ -1,7 +1,10 @@
-import { useState, useCallback } from 'react';
+import React from 'react';
+import { useState } from 'react';
+import Head from 'next/head';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
+import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
@@ -14,76 +17,108 @@ import { Iconify } from '../../components/iconify';
 
 // ----------------------------------------------------------------------
 
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
 export function SignUpView() {
   const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const router = useRouter();
+
+  const validatePassword = (value: string) => {
+    if (!value) {
+      setPasswordError('Password is required');
+      return false;
+    }
+    if (!PASSWORD_REGEX.test(value)) {
+      setPasswordError(
+        'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+      );
+      return false;
+    }
+    setPasswordError('');
+    return true;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setPasswordError('');
+
+    if (!validatePassword(password)) {
+      return;
+    }
+
     try {
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, { name, email, password });
-      router.push('/');
+      router.push('/?message=Registration successful! Please sign in.');
     } catch (err) {
       setError(err.response?.data.message || 'Registration failed');
     }
   };
 
+  const handlePasswordChange = (e) => {
+    const value = e.target.value;
+    setPassword(value);
+    validatePassword(value);
+  };
+
   const renderForm = (
     <Box
+      component="form"
+      onSubmit={handleSubmit}
       sx={{
         display: 'flex',
-        alignItems: 'flex-end',
         flexDirection: 'column',
+        width: '100%',
       }}
     >
+      {error && (
+        <Alert severity="error" sx={{ mb: 3, width: '100%' }}>
+          {error}
+        </Alert>
+      )}
       <TextField
         fullWidth
+        required
         name="name"
         label="Name"
-        defaultValue="demo"
         sx={{ mb: 3 }}
-        slotProps={{
-          inputLabel: { shrink: true },
-        }}
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
       <TextField
         fullWidth
+        required
         name="email"
+        type="email"
         label="Email address"
-        defaultValue="hello@gmail.com"
         sx={{ mb: 3 }}
-        slotProps={{
-          inputLabel: { shrink: true },
-        }}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
       <TextField
         fullWidth
+        required
         name="password"
         label="Password"
-        defaultValue="@demo1234"
         type={showPassword ? 'text' : 'password'}
-        slotProps={{
-          inputLabel: { shrink: true },
-          input: {
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                  <Iconify icon={showPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
-                </IconButton>
-              </InputAdornment>
-            ),
-          },
+        error={!!passwordError}
+        helperText={passwordError}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                <Iconify icon={showPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+              </IconButton>
+            </InputAdornment>
+          ),
         }}
         value={password}
-        onChange={(e) => setPassword(e.target.value)}
+        onChange={handlePasswordChange}
         sx={{ mb: 3 }}
       />
 
@@ -93,7 +128,6 @@ export function SignUpView() {
         type="submit"
         color="inherit"
         variant="contained"
-        onClick={handleSubmit}
       >
         Sign Up
       </Button>
@@ -102,6 +136,9 @@ export function SignUpView() {
 
   return (
     <>
+      <Head>
+        <title>Sign Up | Data Management System</title>
+      </Head>
       <Box
         sx={{
           gap: 1.5,

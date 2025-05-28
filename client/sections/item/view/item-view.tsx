@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
@@ -44,17 +44,18 @@ import { inherits } from 'util';
 
 // ----------------------------------------------------------------------
 export type Item = {
-    _id: string;
-    name: string;
-    description: string;
-    price: number;
-  };
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+};
 export function ItemView() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [editId, setEditId] = useState(null);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -100,6 +101,8 @@ export function ItemView() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
+    setError('');
+    setSuccessMessage('');
     try {
       if (editId) {
         const res = await axios.put(
@@ -109,6 +112,7 @@ export function ItemView() {
         );
         setItems(items.map((item) => (item._id === editId ? res.data : item)));
         setEditId(null);
+        setSuccessMessage('Item updated successfully!');
       } else {
         const res = await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL}/items`,
@@ -116,6 +120,7 @@ export function ItemView() {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setItems([...items, res.data]);
+        setSuccessMessage('Item added successfully!');
       }
       setName('');
       setDescription('');
@@ -131,6 +136,7 @@ export function ItemView() {
     setName(item.name);
     setDescription(item.description);
     setPrice(item.price);
+    setSuccessMessage('');
   };
 
   const handleAddDialogOpen = () => {
@@ -139,12 +145,14 @@ export function ItemView() {
     setPrice('');
     setEditId(null);
     setError('');
+    setSuccessMessage('');
     setAddDialogOpen(true);
   };
 
   const handleAddDialogClose = () => {
-    if (submitting) return; 
+    if (submitting) return;
     setAddDialogOpen(false);
+    setSuccessMessage('');
     setTimeout(() => {
       setName('');
       setDescription('');
@@ -166,6 +174,7 @@ export function ItemView() {
       setItems(items.filter((item) => item._id !== selectedItem._id));
       setDeleteDialogOpen(false);
       setSelectedItem(null);
+      setSuccessMessage('Item deleted successfully!');
     } catch (err) {
       setError(err.response?.data.message || 'Delete failed');
     }
@@ -178,19 +187,36 @@ export function ItemView() {
           mb: 5,
           display: 'flex',
           alignItems: 'center',
+          flexDirection: 'column',
+          gap: 2,
         }}
       >
-        <Typography variant="h4" sx={{ flexGrow: 1 }}>
-          Items
-        </Typography>
-        <Button
-          variant="contained"
-          color="inherit"
-          startIcon={<Iconify icon="mingcute:add-line" />}
-          onClick={handleAddDialogOpen}
-        >
-          New Item
-        </Button>
+        {successMessage && (
+          <Alert
+            severity="success"
+            sx={{ width: '100%' }}
+            onClose={() => setSuccessMessage('')}
+          >
+            {successMessage}
+          </Alert>
+        )}
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          width: '100%'
+        }}>
+          <Typography variant="h4" sx={{ flexGrow: 1 }}>
+            Items
+          </Typography>
+          <Button
+            variant="contained"
+            color="inherit"
+            startIcon={<Iconify icon="mingcute:add-line" />}
+            onClick={handleAddDialogOpen}
+          >
+            New Item
+          </Button>
+        </Box>
       </Box>
 
       <Card>
@@ -202,10 +228,23 @@ export function ItemView() {
             table.onResetPage();
           }}
         />
-
-        <Scrollbar>
-          <TableContainer sx={{ overflow: 'unset' }}>
-            <Table sx={{ minWidth: 800 }}>
+        <Box>
+          <TableContainer sx={{ 
+            position: 'relative',
+            overflow: 'auto',
+            maxHeight: '70vh',
+            width: '100%',
+            '@media (max-width: 600px)': {
+              maxHeight: 'calc(100vh - 200px)',
+            }
+          }}>
+            <Table stickyHeader sx={{ 
+              minWidth: {
+                xs: 350, // For extra-small screens
+                sm: 600, // For small screens
+                md: 800  // For medium and up screens
+              }
+            }}>
               <ItemTableHead
                 order={table.order}
                 orderBy={table.orderBy}
@@ -220,9 +259,9 @@ export function ItemView() {
                 }
                 headLabel={[
                   { id: 'name', label: 'Name' },
-                  { id: 'description', label: 'Description' },
-                  { id: 'price', label: 'Price' },
-                  { id: '' },
+                  { id: 'description', label: 'Description', hideOnMobile: true },
+                  { id: 'price', label: 'Price', align: 'right' },
+                  { id: 'actions', label: '', align: 'right' },
                 ]}
               />
               <TableBody>
@@ -248,12 +287,11 @@ export function ItemView() {
                   height={68}
                   emptyRows={emptyRows(table.page, table.rowsPerPage, items.length)}
                 />
-
                 {notFound && <TableNoData searchQuery={filterName} />}
               </TableBody>
             </Table>
           </TableContainer>
-        </Scrollbar>
+        </Box>
 
         <TablePagination
           component="div"

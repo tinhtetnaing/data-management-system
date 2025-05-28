@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
@@ -9,6 +9,9 @@ import MenuList from '@mui/material/MenuList';
 import TableCell from '@mui/material/TableCell';
 import IconButton from '@mui/material/IconButton';
 import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import Typography from '@mui/material/Typography';
 
 import { Label } from '../../components/label';
 import { Iconify } from '../../components/iconify';
@@ -35,6 +38,8 @@ type ItemTableRowProps = {
 
 export function ItemTableRow({ row, selected, onSelectRow, handleEdit, setAddDialogOpen, setDeleteDialogOpen, setSelectedItem }: ItemTableRowProps) {
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     setOpenPopover(event.currentTarget);
@@ -64,7 +69,15 @@ export function ItemTableRow({ row, selected, onSelectRow, handleEdit, setAddDia
           <Checkbox disableRipple checked={selected} onChange={onSelectRow} />
         </TableCell>
 
-        <TableCell component="th" scope="row">
+        <TableCell 
+          component="th" 
+          scope="row"
+          sx={{
+            '@media (max-width: 600px)': {
+              minWidth: '150px',
+            }
+          }}
+        >
           <Box
             sx={{
               gap: 2,
@@ -73,14 +86,39 @@ export function ItemTableRow({ row, selected, onSelectRow, handleEdit, setAddDia
             }}
           >
             {row.name}
+            {isMobile && (
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'text.secondary',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 1,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  ml: 1,
+                }}
+              >
+                {row.description}
+              </Typography>
+            )}
           </Box>
         </TableCell>
 
-        <TableCell>{row.description}</TableCell>
+        {!isMobile && <TableCell>{row.description}</TableCell>}
 
-        <TableCell>{row.price}</TableCell>
+        <TableCell align="right" sx={{
+          '@media (max-width: 600px)': {
+            minWidth: '80px',
+          }
+        }}>
+          ${row.price.toFixed(2)}
+        </TableCell>
 
-        <TableCell align="right">
+        <TableCell align="right" sx={{
+          '@media (max-width: 600px)': {
+            minWidth: '50px',
+          }
+        }}>
           <IconButton onClick={handleOpenPopover}>
             <Iconify icon="eva:more-vertical-fill" />
           </IconButton>
@@ -93,13 +131,21 @@ export function ItemTableRow({ row, selected, onSelectRow, handleEdit, setAddDia
         onClose={handleClosePopover}
         anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        PaperProps={{
+          sx: {
+            width: 140,
+            ...(isMobile && {
+              width: '100%',
+              maxWidth: '200px',
+            }),
+          },
+        }}
       >
         <MenuList
           disablePadding
           sx={{
             p: 0.5,
             gap: 0.5,
-            width: 140,
             display: 'flex',
             flexDirection: 'column',
             [`& .${menuItemClasses.root}`]: {

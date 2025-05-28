@@ -2,10 +2,8 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
-
-import { RouterLink } from 'src/routes/components';
-
-import { Logo } from 'src/components/logo';
+import { Link } from '@mui/material';
+import { Logo } from '../../components/logo';
 
 // ----------------------------------------------------------------------
 
@@ -43,7 +41,7 @@ export function NotFoundView() {
           }}
         />
 
-        <Button component={RouterLink} href="/" size="large" variant="contained" color="inherit">
+        <Button component={Link} href="/dashboard" size="large" variant="contained" color="inherit">
           Go to home
         </Button>
       </Container>
