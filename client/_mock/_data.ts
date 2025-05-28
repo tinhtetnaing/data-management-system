@@ -45,6 +45,15 @@ export const _users = [...Array(24)].map((_, index) => ({
 
 // ----------------------------------------------------------------------
 
+export const _items = [...Array(24)].map((_, index) => ({
+  id: _id(index),
+  name: _fullName(index),
+  description: _description(index),
+  price: _price(index)
+}));
+
+// ----------------------------------------------------------------------
+
 export const _posts = [...Array(23)].map((_, index) => ({
   id: _id(index),
   title: _postTitles(index),

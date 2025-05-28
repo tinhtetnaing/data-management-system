@@ -12,17 +12,27 @@ import { AnalyticsWidgetSummary } from '../analytics-widget-summary';
 import { AnalyticsTrafficBySite } from '../analytics-traffic-by-site';
 import { AnalyticsCurrentSubject } from '../analytics-current-subject';
 import { AnalyticsConversionRates } from '../analytics-conversion-rates';
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
 
 // ----------------------------------------------------------------------
 
 export function OverviewAnalyticsView() {
+  const router = useRouter();
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      router.push('/');
+      return;
+    }
+  }, [router]);
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
         Hi, Welcome back 👋
       </Typography>
 
-      {/* <Grid container spacing={3}>
+      <Grid container spacing={3}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <AnalyticsWidgetSummary
             title="Weekly sales"
@@ -149,7 +159,7 @@ export function OverviewAnalyticsView() {
         <Grid size={{ xs: 12, md: 6, lg: 8 }}>
           <AnalyticsTasks title="Tasks" list={_tasks} />
         </Grid>
-      </Grid> */}
+      </Grid> 
     </DashboardContent>
   );
 }

@@ -12,26 +12,28 @@ import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
 
 import { Label } from '../../components/label';
 import { Iconify } from '../../components/iconify';
+import { Item } from './view';
 
 // ----------------------------------------------------------------------
 
-export type UserProps = {
-  id: string;
+export type ItemProps = {
+  _id: string;
   name: string;
-  role: string;
-  status: string;
-  company: string;
-  avatarUrl: string;
-  isVerified: boolean;
+  description: string;
+  price: number;
 };
 
-type UserTableRowProps = {
-  row: UserProps;
+type ItemTableRowProps = {
+  row: ItemProps;
   selected: boolean;
   onSelectRow: () => void;
+  handleEdit:(value: Item) => void;
+  setAddDialogOpen: (status: boolean) => void;
+  setDeleteDialogOpen: (status: boolean) => void;
+  setSelectedItem: (value: Item) => void;
 };
 
-export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) {
+export function ItemTableRow({ row, selected, onSelectRow, handleEdit, setAddDialogOpen, setDeleteDialogOpen, setSelectedItem }: ItemTableRowProps) {
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
 
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
@@ -41,6 +43,19 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
   const handleClosePopover = useCallback(() => {
     setOpenPopover(null);
   }, []);
+
+  const handleEditButton = (item: Item) => {
+    setOpenPopover(null);
+    setSelectedItem(item);
+    handleEdit(item);
+    setAddDialogOpen(true);
+  }
+
+  const handleDeleteButton = (item: Item) => {
+    setOpenPopover(null);
+    setSelectedItem(item);
+    setDeleteDialogOpen(true);
+  }
 
   return (
     <>
@@ -57,26 +72,13 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
               alignItems: 'center',
             }}
           >
-            <Avatar alt={row.name} src={row.avatarUrl} />
             {row.name}
           </Box>
         </TableCell>
 
-        <TableCell>{row.company}</TableCell>
+        <TableCell>{row.description}</TableCell>
 
-        <TableCell>{row.role}</TableCell>
-
-        <TableCell align="center">
-          {row.isVerified ? (
-            <Iconify width={22} icon="solar:check-circle-bold" sx={{ color: 'success.main' }} />
-          ) : (
-            '-'
-          )}
-        </TableCell>
-
-        <TableCell>
-          <Label color={(row.status === 'banned' && 'error') || 'success'}>{row.status}</Label>
-        </TableCell>
+        <TableCell>{row.price}</TableCell>
 
         <TableCell align="right">
           <IconButton onClick={handleOpenPopover}>
@@ -108,12 +110,12 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
             },
           }}
         >
-          <MenuItem onClick={handleClosePopover}>
+          <MenuItem onClick={() =>handleEditButton(row)}>
             <Iconify icon="solar:pen-bold" />
             Edit
           </MenuItem>
 
-          <MenuItem onClick={handleClosePopover} sx={{ color: 'error.main' }}>
+          <MenuItem onClick={() => handleDeleteButton(row)} sx={{ color: 'error.main' }}>
             <Iconify icon="solar:trash-bin-trash-bold" />
             Delete
           </MenuItem>

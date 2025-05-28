@@ -1,9 +1,11 @@
-import { OverviewAnalyticsView as DashboardView } from '../sections/overview/view';
 import { DashboardLayout } from '../layouts/dashboard';
+import { ItemView } from '../sections/item/view';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 
-export default function Dashboard() {
+// ----------------------------------------------------------------------
+
+export default function Page() {
   const router = useRouter();
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -12,8 +14,10 @@ export default function Dashboard() {
       return;
     }})
   return (
+    <>
     <DashboardLayout>
-      <DashboardView />
-    </DashboardLayout>
+      <ItemView />
+      </DashboardLayout>
+    </>
   );
 }
